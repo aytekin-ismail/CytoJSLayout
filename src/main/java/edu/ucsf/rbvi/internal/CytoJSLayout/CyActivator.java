@@ -1,7 +1,11 @@
 package edu.ucsf.rbvi.myapp.internal;
 
+import edu.ucsf.rbvi.internal.CytoJSLayout.MyTaskFactory;
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
+
+import java.util.Properties;
 
 /**
  * {@code CyActivator} is a class that is a starting point for OSGi bundles.
@@ -28,6 +32,9 @@ import org.osgi.framework.BundleContext;
  * {@code unget}s any services we fetch using getService().
  */
 public class CyActivator extends AbstractCyActivator {
+	public CyActivator() {
+		super();
+	}
 	/**
 	 * This is the {@code start} method, which sets up your app. The
 	 * {@code BundleContext} object allows you to communicate with the OSGi
@@ -36,5 +43,14 @@ public class CyActivator extends AbstractCyActivator {
 	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
+		MyTaskFactory myFactory = new MyTaskFactory();
+		Properties props = new Properties();
+
+		props.setProperty("preferredMenu", "Apps.Samples");
+		props.setProperty("title", "Hello world!");
+//		props.setProperty(IN_MENU_BAR, "true");
+
+		registerService(context, myFactory, TaskFactory.class, props);
+
 	}
 }
