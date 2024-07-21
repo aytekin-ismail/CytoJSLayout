@@ -1,8 +1,10 @@
-package edu.ucsf.rbvi.myapp.internal;
+package edu.ucsf.rbvi.internal.CytoJSLayout;
 
 import edu.ucsf.rbvi.internal.CytoJSLayout.MyTaskFactory;
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.TaskFactory;
+import org.cytoscape.work.undo.UndoSupport;
 import org.osgi.framework.BundleContext;
 
 import java.util.Properties;
@@ -43,14 +45,8 @@ public class CyActivator extends AbstractCyActivator {
 	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
-		MyTaskFactory myFactory = new MyTaskFactory();
-		Properties props = new Properties();
-
-		props.setProperty("preferredMenu", "Apps.Samples");
-		props.setProperty("title", "Hello world!");
-//		props.setProperty(IN_MENU_BAR, "true");
-
-		registerService(context, myFactory, TaskFactory.class, props);
+		final CyServiceRegistrar serviceRegistrar = getService(context, CyServiceRegistrar.class);
+		final UndoSupport undoSupport = getService(context, UndoSupport.class);
 
 	}
 }
