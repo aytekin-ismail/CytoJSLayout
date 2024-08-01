@@ -97,10 +97,12 @@ public class CoLaLayout extends AbstractLayoutAlgorithm {
 
                 try {
                     JSONObject layoutOptions = new JSONObject();
-                    layoutOptions.put("name", "CoLa");
+                    layoutOptions.put("name", "cola");
+                    layoutOptions.put("animate", false);
                     layoutOptions.put("nodeDimensionsIncludeLabels", myContext.nodeDimensionsIncludeLabels);
                     layoutOptions.put("avoidOverlap", myContext.avoidOverlap);
                     layoutOptions.put("handleDisconnected", myContext.handleDisconnected);
+                    layoutOptions.put("randomize", true);
 
                     layoutOptions.put("padding", myContext.padding);
                     layoutOptions.put("convergenceThreshold", myContext.convergenceThreshold);
@@ -111,6 +113,18 @@ public class CoLaLayout extends AbstractLayoutAlgorithm {
                     layoutOptions.put("unconstrIter", myContext.unconstrIter);
                     layoutOptions.put("userConstIter", myContext.userConstIter);
                     layoutOptions.put("allConstIter", myContext.allConstIter);
+
+                    JSONObject imageOptions = new JSONObject();
+                    imageOptions.put("format", "png");
+                    imageOptions.put("background", "transparent");
+                    imageOptions.put("width", 1280);
+                    imageOptions.put("height", 720);
+                    imageOptions.put("color", "bluescale");
+
+                    jsonOptionsObject.put("layoutOptions", layoutOptions);
+                    jsonOptionsObject.put("imageOptions", imageOptions);
+
+                    System.out.println(jsonOptionsObject.toString(4));
 
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
