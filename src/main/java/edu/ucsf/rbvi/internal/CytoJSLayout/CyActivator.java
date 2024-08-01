@@ -56,8 +56,8 @@ public class CyActivator extends AbstractCyActivator {
 		{
 			final fcoseLayout fcoseLayout = new fcoseLayout(undoSupport, writeCyJs);
 			final Properties props = new Properties();
-//			props.setProperty("preferredTaskManager", "menu");
-			props.setProperty(PREFERRED_MENU, "Apps.Samples");
+			props.setProperty("preferredTaskManager", "menu");
+			props.setProperty(PREFERRED_MENU, "Layout.CyJS_Layouts");
 			props.setProperty(TITLE, fcoseLayout.toString());
 			props.setProperty(MENU_GRAVITY, "10.1");
 			registerService(context, fcoseLayout, CyLayoutAlgorithm.class, props);
