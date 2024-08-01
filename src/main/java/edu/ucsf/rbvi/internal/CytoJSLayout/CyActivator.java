@@ -1,13 +1,15 @@
 package edu.ucsf.rbvi.internal.CytoJSLayout;
 
-import edu.ucsf.rbvi.internal.CytoJSLayout.MyTaskFactory;
+import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.work.TaskFactory;
+import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.work.undo.UndoSupport;
 import org.osgi.framework.BundleContext;
 
 import java.util.Properties;
+
+import static org.cytoscape.work.ServiceProperties.*;
 
 /**
  * {@code CyActivator} is a class that is a starting point for OSGi bundles.
@@ -47,6 +49,19 @@ public class CyActivator extends AbstractCyActivator {
 	public void start(BundleContext context) throws Exception {
 		final CyServiceRegistrar serviceRegistrar = getService(context, CyServiceRegistrar.class);
 		final UndoSupport undoSupport = getService(context, UndoSupport.class);
+
+		String filter = "("+ID+"=cytoscapejsNetworkWriterFactory)";
+		CyNetworkViewWriterFactory writeCyJs = serviceRegistrar.getService(CyNetworkViewWriterFactory.class, filter);
+
+		{
+			final fcoseLayout fcoseLayout = new fcoseLayout(undoSupport, writeCyJs);
+			final Properties props = new Properties();
+//			props.setProperty("preferredTaskManager", "menu");
+			props.setProperty(PREFERRED_MENU, "Apps.Samples");
+			props.setProperty(TITLE, fcoseLayout.toString());
+			props.setProperty(MENU_GRAVITY, "10.1");
+			registerService(context, fcoseLayout, CyLayoutAlgorithm.class, props);
+		}
 
 	}
 }
