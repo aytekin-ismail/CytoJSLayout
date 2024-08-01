@@ -7,6 +7,7 @@ import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.work.undo.UndoSupport;
 import org.osgi.framework.BundleContext;
 
+import java.util.Collection;
 import java.util.Properties;
 
 import static org.cytoscape.work.ServiceProperties.*;
@@ -61,6 +62,15 @@ public class CyActivator extends AbstractCyActivator {
 			props.setProperty(TITLE, fcoseLayout.toString());
 			props.setProperty(MENU_GRAVITY, "10.1");
 			registerService(context, fcoseLayout, CyLayoutAlgorithm.class, props);
+		}
+		{
+			final CoLaLayout coLaLayout = new CoLaLayout(undoSupport, writeCyJs);
+			final Properties props = new Properties();
+			props.setProperty("preferredTaskManager", "menu");
+			props.setProperty(PREFERRED_MENU, "Layout.CyJS_Layouts");
+			props.setProperty(TITLE, coLaLayout.toString());
+			props.setProperty(MENU_GRAVITY, "10.1");
+			registerService(context, coLaLayout, CyLayoutAlgorithm.class, props);
 		}
 
 	}
