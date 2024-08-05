@@ -72,6 +72,15 @@ public class CyActivator extends AbstractCyActivator {
 			props.setProperty(MENU_GRAVITY, "10.1");
 			registerService(context, coLaLayout, CyLayoutAlgorithm.class, props);
 		}
+		{
+			final CiSELayout ciSELayout = new CiSELayout(undoSupport, writeCyJs);
+			final Properties props = new Properties();
+			props.setProperty("preferredTaskManager", "menu");
+			props.setProperty(PREFERRED_MENU, "Layout.CyJS_Layouts");
+			props.setProperty(TITLE, ciSELayout.toString());
+			props.setProperty(MENU_GRAVITY, "10.1");
+			registerService(context, ciSELayout, CyLayoutAlgorithm.class, props);
+		}
 
 	}
 }
