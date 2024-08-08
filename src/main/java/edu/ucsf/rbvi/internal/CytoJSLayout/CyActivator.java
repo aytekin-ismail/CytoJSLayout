@@ -81,6 +81,15 @@ public class CyActivator extends AbstractCyActivator {
 			props.setProperty(MENU_GRAVITY, "10.1");
 			registerService(context, ciSELayout, CyLayoutAlgorithm.class, props);
 		}
+		{
+			final DagreLayout dagreLayout = new DagreLayout(undoSupport, writeCyJs);
+			final Properties props = new Properties();
+			props.setProperty("preferredTaskManager", "menu");
+			props.setProperty(PREFERRED_MENU, "Layout");
+			props.setProperty(TITLE, dagreLayout.toString());
+			props.setProperty(MENU_GRAVITY, "10.1");
+			registerService(context, dagreLayout, CyLayoutAlgorithm.class, props);
+		}
 
 	}
 }
