@@ -59,10 +59,7 @@ public class CoLaLayout extends AbstractLayoutAlgorithm {
                 };
 
                 // Open Output stream
-                CyWriter jsonWriter = writeCyJs.createWriter(
-                        outputString,
-                        myView
-                );
+                CyWriter jsonWriter = writeCyJs.createWriter(outputString, myView);
                 try {
                     jsonWriter.run(taskMonitor);
                 } catch (Exception e) {

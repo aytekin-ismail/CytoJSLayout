@@ -81,6 +81,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                 JSONObject json = null;
                 try {
                     json = new JSONObject(dataToSend);
+                    System.out.println("Data to send: "+ json);
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -89,6 +90,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                 String elements = null;
                 try {
                     elements = json.getJSONObject("elements").toString();
+                    System.out.println("Elements: " + elements);
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -212,6 +214,6 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
     }
 
     public Object createLayoutContext() {
-        return new CoLaLayoutContext();
+        return new CiSELayoutContext();
     }
 }

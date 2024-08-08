@@ -58,7 +58,7 @@ public class CyActivator extends AbstractCyActivator {
 			final fcoseLayout fcoseLayout = new fcoseLayout(undoSupport, writeCyJs);
 			final Properties props = new Properties();
 			props.setProperty("preferredTaskManager", "menu");
-			props.setProperty(PREFERRED_MENU, "Layout.CyJS_Layouts");
+			props.setProperty(PREFERRED_MENU, "Layout");
 			props.setProperty(TITLE, fcoseLayout.toString());
 			props.setProperty(MENU_GRAVITY, "10.1");
 			registerService(context, fcoseLayout, CyLayoutAlgorithm.class, props);
@@ -67,7 +67,7 @@ public class CyActivator extends AbstractCyActivator {
 			final CoLaLayout coLaLayout = new CoLaLayout(undoSupport, writeCyJs);
 			final Properties props = new Properties();
 			props.setProperty("preferredTaskManager", "menu");
-			props.setProperty(PREFERRED_MENU, "Layout.CyJS_Layouts");
+			props.setProperty(PREFERRED_MENU, "Layout");
 			props.setProperty(TITLE, coLaLayout.toString());
 			props.setProperty(MENU_GRAVITY, "10.1");
 			registerService(context, coLaLayout, CyLayoutAlgorithm.class, props);
@@ -76,7 +76,7 @@ public class CyActivator extends AbstractCyActivator {
 			final CiSELayout ciSELayout = new CiSELayout(undoSupport, writeCyJs);
 			final Properties props = new Properties();
 			props.setProperty("preferredTaskManager", "menu");
-			props.setProperty(PREFERRED_MENU, "Layout.CyJS_Layouts");
+			props.setProperty(PREFERRED_MENU, "Layout");
 			props.setProperty(TITLE, ciSELayout.toString());
 			props.setProperty(MENU_GRAVITY, "10.1");
 			registerService(context, ciSELayout, CyLayoutAlgorithm.class, props);
