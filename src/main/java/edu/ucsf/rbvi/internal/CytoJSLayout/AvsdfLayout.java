@@ -13,13 +13,11 @@ import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.undo.UndoSupport;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -46,6 +44,7 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
         Task task = new AbstractLayoutTask(toString(), networkView, nodesToLayOut, attrName, undoSupport) {
             @Override
             protected void doLayout(TaskMonitor taskMonitor) {
+
                 OutputStream outputString = new OutputStream() {
                     private StringBuilder string = new StringBuilder();
 
@@ -66,32 +65,47 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                     throw new RuntimeException(e);
                 }
 
-                // API Call
-                String dataToSend = outputString.toString();
-
-                // Parse the JSON string
-                JSONObject json = null;
-                try {
-                    json = new JSONObject(dataToSend);
-                    System.out.println("Data to send: "+ json);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-
                 // Access the value of a specific key
-                String elements = null;
+                JSONObject elements = null;
                 try {
-                    elements = json.getJSONObject("elements").toString();
-                    System.out.println("Elements: " + elements);
+                    JSONObject json = new JSONObject(outputString.toString());
+                    elements = json.getJSONObject("elements");
+                    System.out.println("Elements: " + elements.toString(4));
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
 
-                System.out.println("Elements: " + elements);
-                dataToSend = elements;
+                // Store node height and width to be used later
+                Map<String, Double> nodeToWidth = new HashMap<>();
+                Map<String, Double> nodeToHeight = new HashMap<>();
+                for (final View<CyNode> nodeView : nodesToLayOut) {
+                    String nodeId = nodeView.getModel().getSUID().toString();
+
+                    double nodeWidth = nodeView.getVisualProperty(BasicVisualLexicon.NODE_WIDTH);
+                    double nodeHeight = nodeView.getVisualProperty(BasicVisualLexicon.NODE_HEIGHT);
+
+                    nodeToWidth.put(nodeId, nodeWidth);
+                    nodeToHeight.put(nodeId, nodeHeight);
+
+                    System.out.println("Node ID:" + nodeId + " Width:" + nodeWidth + " Height:" + nodeHeight);
+                }
+
+                // Add the node height and width to the elements data
+                try {
+                    JSONArray nodesArray = elements.getJSONArray("nodes");
+
+                    for (int i = 0; i < nodesArray.length(); i++) {
+                        JSONObject node = (JSONObject) nodesArray.get(i);
+                        JSONObject data = (JSONObject) node.get("data");
+                        String nodeSUID = data.get("SUID").toString();
+                        data.put("width", nodeToWidth.get(nodeSUID));
+                        data.put("height", nodeToHeight.get(nodeSUID));
+                    }
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
 
                 JSONObject jsonOptionsObject = new JSONObject();
-
                 try {
                     JSONObject layoutOptions = new JSONObject();
                     layoutOptions.put("name", "avsdf");
@@ -111,48 +125,67 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                     jsonOptionsObject.put("imageOptions", imageOptions);
 
                     System.out.println(jsonOptionsObject.toString(4));
-
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
 
+                String dataToSend = elements.toString();
                 String optionsString = jsonOptionsObject.toString();
 
                 String payload = "[" + dataToSend + "," + optionsString + "]";
-
                 System.out.println("Payload: " + payload + "\n");
+
                 Map<String,JSONObject> nodePositions = new HashMap<String, JSONObject>();
+                Map<String,JSONObject> nodeSizes = new HashMap<String, JSONObject>();
 
                 try {
                     JSONObject layoutFromResponse = apiHelper.postToSyblars(payload);
+
                     Iterator<String> nodes = layoutFromResponse.keys();
                     while(nodes.hasNext()) {
                         String node = nodes.next();
                         JSONObject value = layoutFromResponse.getJSONObject(node);
                         JSONObject position = value.getJSONObject("position");
+                        JSONObject sizes = value.getJSONObject("data");
                         try {
                             nodePositions.put(node, position);
+                            nodeSizes.put(node, sizes);
                         } catch (Exception e) {
                             System.out.println("Exception: " + e.getMessage());
                         }
                         System.out.println("Node: " + node + " Position: " + position);
+                        System.out.println("Node: " + node + " Position: " + sizes);
                     }
                 } catch (Exception e) {
                     System.out.println("Exception: " + e.getMessage());
-                    e.printStackTrace();
                 }
 
                 final VisualProperty<Double> xLoc = BasicVisualLexicon.NODE_X_LOCATION;
                 final VisualProperty<Double> yLoc = BasicVisualLexicon.NODE_Y_LOCATION;
+                final VisualProperty<Double> height = BasicVisualLexicon.NODE_HEIGHT;
+                final VisualProperty<Double> width = BasicVisualLexicon.NODE_WIDTH;
 
                 for (final View<CyNode> nodeView : nodesToLayOut) {
                     String nodeId = nodeView.getModel().getSUID().toString();
                     System.out.println("Node ID: " + nodeId);
                     JSONObject position = nodePositions.get(nodeId);
+                    JSONObject sizes = nodeSizes.get(nodeId);
+
+                    // Set new position of the nodes
                     if(position != null) {
                         try {
                             nodeView.setVisualProperty(xLoc, position.getDouble("x"));
                             nodeView.setVisualProperty(yLoc, position.getDouble("y"));
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    // Set new sizes of the nodes
+                    if(sizes != null) {
+                        try {
+                            nodeView.setVisualProperty(height, sizes.getDouble("height"));
+                            nodeView.setVisualProperty(width, sizes.getDouble("width"));
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }

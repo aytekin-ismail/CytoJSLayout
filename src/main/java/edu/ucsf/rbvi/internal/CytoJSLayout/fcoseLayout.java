@@ -96,6 +96,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                     System.out.println("Node ID:" + nodeId + " Width:" + nodeWidth + " Height:" + nodeHeight);
                 }
 
+                // Add the node height and width to the elements data
                 try {
                     JSONArray nodesArray = elements.getJSONArray("nodes");
 
