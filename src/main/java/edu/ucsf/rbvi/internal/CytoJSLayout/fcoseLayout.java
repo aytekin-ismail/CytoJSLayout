@@ -40,6 +40,8 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
         final fcoseLayoutContext myContext = (fcoseLayoutContext) context;
         final CyNetworkView myView = networkView;
         final CyNetworkViewWriterFactory writeCyJs = this.writeCyJs;
+        String url = "http://localhost:3000/json?image=false";
+        final ApiHelper apiHelper = new ApiHelper(url);
 
         Task task = new AbstractLayoutTask(
                 toString(), networkView, nodesToLayOut, attrName, undoSupport
@@ -72,8 +74,6 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                 }
 
                 // API Call
-                // TODO: Make this a variable
-                String url = "http://localhost:3000/json?image=false";
                 String dataToSend = outputString.toString();
 
                 // Parse the JSON string
@@ -177,36 +177,8 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                 Map<String,JSONObject> nodeSizes = new HashMap<String, JSONObject>();
 
                 try {
-                    URL obj = new URI(url).toURL();
-                    HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
-                    connection.setRequestMethod("POST");
-                    connection.setRequestProperty("Content-Type", "text/plain");
-                    connection.setDoOutput(true);
-                    try (DataOutputStream os = new DataOutputStream(connection.getOutputStream())) {
-                        os.writeBytes(payload);
-                        os.flush();
-                    }
-                    int responseCode = connection.getResponseCode();
-                    StringBuilder response = new StringBuilder();
-                    if(responseCode == HttpURLConnection.HTTP_OK) {
-                        try (
-                                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))
-                        ) {
-                            String line;
-                            while((line = reader.readLine()) != null) {
-                                response.append(line);
-                            }
-                        }
-                        System.out.println("Response: " + response + "\n");
-                    }
-                    else {
-                        System.out.println("POST request failed: " + responseCode);
-                    }
-                    connection.disconnect();
+                    JSONObject layoutFromResponse = apiHelper.postToSyblars(payload);
 
-                    //iterate over response
-                    JSONObject jsonResponse = new JSONObject(response.toString());
-                    JSONObject layoutFromResponse = jsonResponse.getJSONObject("layout");
                     Iterator<String> nodes = layoutFromResponse.keys();
                     while(nodes.hasNext()) {
                         String node = nodes.next();
@@ -225,7 +197,6 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                 }
                 catch (Exception e) {
                     System.out.println("Exception: " + e.getMessage());
-                    e.printStackTrace();
                 }
 
                 final VisualProperty<Double> xLoc = BasicVisualLexicon.NODE_X_LOCATION;
