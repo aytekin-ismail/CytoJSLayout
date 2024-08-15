@@ -27,10 +27,12 @@ import java.util.Set;
 
 public class CiSELayout extends AbstractLayoutAlgorithm {
     private final CyNetworkViewWriterFactory writeCyJs;
+    private final String syblarsUrl;
 
-    public CiSELayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork) {
+    public CiSELayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
         super("CiSELayout", "CiSE Layout", undo);
         this.writeCyJs = writeNetwork;
+        this.syblarsUrl = syblarsUrl;
     }
 
     public TaskIterator createTaskIterator(
@@ -42,6 +44,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
         final CiSELayoutContext myContext = (CiSELayoutContext) context;
         final CyNetworkView myView = networkView;
         final CyNetworkViewWriterFactory writeCyJs = this.writeCyJs;
+        final ApiHelper apiHelper = new ApiHelper(syblarsUrl);
 
         Task task = new AbstractLayoutTask(
                 toString(),
@@ -73,8 +76,6 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                 }
 
                 // API Call
-                // TODO: Make this a variable
-                String url = "http://localhost:3000/json?image=false";
                 String dataToSend = outputString.toString();
 
                 // Parse the JSON string
@@ -141,38 +142,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                 Map<String,JSONObject> nodePositions = new HashMap<String, JSONObject>();
 
                 try {
-                    URL obj = new URI(url).toURL();
-                    HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
-                    connection.setRequestMethod("POST");
-                    connection.setRequestProperty("Content-Type", "text/plain");
-                    connection.setDoOutput(true);
-                    try (DataOutputStream os = new DataOutputStream(connection.getOutputStream())) {
-                        os.writeBytes(payload);
-                        os.flush();
-                    }
-                    int responseCode = connection.getResponseCode();
-                    StringBuilder response = new StringBuilder();
-                    if(responseCode == HttpURLConnection.HTTP_OK) {
-                        try (
-                                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                                        connection.getInputStream()
-                                ))
-                        ) {
-                            String line;
-                            while((line = reader.readLine()) != null) {
-                                response.append(line);
-                            }
-                        }
-                        System.out.println("Response: " + response + "\n");
-                    }
-                    else {
-                        System.out.println("POST request failed: " + responseCode);
-                    }
-                    connection.disconnect();
-
-                    //iterate over response
-                    JSONObject jsonResponse = new JSONObject(response.toString());
-                    JSONObject layoutFromResponse = jsonResponse.getJSONObject("layout");
+                    JSONObject layoutFromResponse = apiHelper.postToSyblars(payload);
                     Iterator<String> nodes = layoutFromResponse.keys();
                     while(nodes.hasNext()) {
                         String node = nodes.next();

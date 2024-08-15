@@ -28,10 +28,12 @@ import java.util.Set;
 
 public class fcoseLayout extends AbstractLayoutAlgorithm {
     private final CyNetworkViewWriterFactory writeCyJs;
+    private final String syblarsUrl;
 
-    public fcoseLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork) {
+    public fcoseLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
         super("fcoseLayout", "fCoSE Layout", undo);
         this.writeCyJs = writeNetwork;
+        this.syblarsUrl = syblarsUrl;
     }
 
     public TaskIterator createTaskIterator(CyNetworkView networkView, Object context,
@@ -40,8 +42,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
         final fcoseLayoutContext myContext = (fcoseLayoutContext) context;
         final CyNetworkView myView = networkView;
         final CyNetworkViewWriterFactory writeCyJs = this.writeCyJs;
-        String url = "http://localhost:3000/json?image=false";
-        final ApiHelper apiHelper = new ApiHelper(url);
+        final ApiHelper apiHelper = new ApiHelper(syblarsUrl);
 
         Task task = new AbstractLayoutTask(
                 toString(), networkView, nodesToLayOut, attrName, undoSupport

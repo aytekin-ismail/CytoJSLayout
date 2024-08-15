@@ -50,12 +50,13 @@ public class CyActivator extends AbstractCyActivator {
 	public void start(BundleContext context) throws Exception {
 		final CyServiceRegistrar serviceRegistrar = getService(context, CyServiceRegistrar.class);
 		final UndoSupport undoSupport = getService(context, UndoSupport.class);
+		final String syblarsURL = "http://localhost:3000/json?image=false";
 
 		String filter = "("+ID+"=cytoscapejsNetworkWriterFactory)";
 		CyNetworkViewWriterFactory writeCyJs = serviceRegistrar.getService(CyNetworkViewWriterFactory.class, filter);
 
 		{
-			final fcoseLayout fcoseLayout = new fcoseLayout(undoSupport, writeCyJs);
+			final fcoseLayout fcoseLayout = new fcoseLayout(undoSupport, writeCyJs, syblarsURL);
 			final Properties props = new Properties();
 			props.setProperty("preferredTaskManager", "menu");
 			props.setProperty(PREFERRED_MENU, "Layout");
@@ -64,7 +65,7 @@ public class CyActivator extends AbstractCyActivator {
 			registerService(context, fcoseLayout, CyLayoutAlgorithm.class, props);
 		}
 		{
-			final CoLaLayout coLaLayout = new CoLaLayout(undoSupport, writeCyJs);
+			final CoLaLayout coLaLayout = new CoLaLayout(undoSupport, writeCyJs, syblarsURL);
 			final Properties props = new Properties();
 			props.setProperty("preferredTaskManager", "menu");
 			props.setProperty(PREFERRED_MENU, "Layout");
@@ -73,7 +74,7 @@ public class CyActivator extends AbstractCyActivator {
 			registerService(context, coLaLayout, CyLayoutAlgorithm.class, props);
 		}
 		{
-			final CiSELayout ciSELayout = new CiSELayout(undoSupport, writeCyJs);
+			final CiSELayout ciSELayout = new CiSELayout(undoSupport, writeCyJs, syblarsURL);
 			final Properties props = new Properties();
 			props.setProperty("preferredTaskManager", "menu");
 			props.setProperty(PREFERRED_MENU, "Layout");
@@ -82,7 +83,7 @@ public class CyActivator extends AbstractCyActivator {
 			registerService(context, ciSELayout, CyLayoutAlgorithm.class, props);
 		}
 		{
-			final DagreLayout dagreLayout = new DagreLayout(undoSupport, writeCyJs);
+			final DagreLayout dagreLayout = new DagreLayout(undoSupport, writeCyJs, syblarsURL);
 			final Properties props = new Properties();
 			props.setProperty("preferredTaskManager", "menu");
 			props.setProperty(PREFERRED_MENU, "Layout");
@@ -91,7 +92,7 @@ public class CyActivator extends AbstractCyActivator {
 			registerService(context, dagreLayout, CyLayoutAlgorithm.class, props);
 		}
 		{
-			final AvsdfLayout avsdfLayout = new AvsdfLayout(undoSupport, writeCyJs);
+			final AvsdfLayout avsdfLayout = new AvsdfLayout(undoSupport, writeCyJs, syblarsURL);
 			final Properties props = new Properties();
 			props.setProperty("preferredTaskManager", "menu");
 			props.setProperty(PREFERRED_MENU, "Layout");

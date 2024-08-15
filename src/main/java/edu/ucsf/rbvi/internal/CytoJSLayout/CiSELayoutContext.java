@@ -13,7 +13,7 @@ public class CiSELayoutContext implements TunableValidator {
     public boolean allowNodesInsideCircle = false; //Default Value
 
     @Tunable(description="Padding")
-    public int padding= 30;// Default value
+    public double padding= 30;// Default value
     @Tunable(description="Node Separation")
     public double nodeSeparation= 12.5;// Default value
     @Tunable(description="Inter-Cluster Edge Length Coeff.")
