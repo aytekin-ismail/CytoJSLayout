@@ -18,9 +18,6 @@ import org.json.JSONObject;
 import org.json.JSONException;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -74,30 +71,19 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                     throw new RuntimeException(e);
                 }
 
-                // API Call
-                String dataToSend = outputString.toString();
-
-                // Parse the JSON string
-                JSONObject json = null;
-                try {
-                    json = new JSONObject(dataToSend);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-
                 // Access the value of a specific key
-                String elements = null;
+                JSONObject elements = null;
                 try {
-                    elements = json.getJSONObject("elements").toString();
+                    JSONObject json = new JSONObject(outputString.toString());
+                    elements = json.getJSONObject("elements");
+                    System.out.println("Elements: " + elements.toString(4));
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
 
-                System.out.println("Elements: " + elements);
-
+                // Store node height and width to be used later
                 Map<String, Double> nodeToWidth = new HashMap<>();
                 Map<String, Double> nodeToHeight = new HashMap<>();
-
                 for (final View<CyNode> nodeView : nodesToLayOut) {
                     String nodeId = nodeView.getModel().getSUID().toString();
 
@@ -110,10 +96,8 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                     System.out.println("Node ID:" + nodeId + " Width:" + nodeWidth + " Height:" + nodeHeight);
                 }
 
-                String newElements = null;
                 try {
-                    JSONObject elementsJson = new JSONObject(elements);
-                    JSONArray nodesArray = elementsJson.getJSONArray("nodes");
+                    JSONArray nodesArray = elements.getJSONArray("nodes");
 
                     for (int i = 0; i < nodesArray.length(); i++) {
                         JSONObject node = (JSONObject) nodesArray.get(i);
@@ -122,14 +106,9 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                         data.put("width", nodeToWidth.get(nodeSUID));
                         data.put("height", nodeToHeight.get(nodeSUID));
                     }
-
-                    newElements = elementsJson.toString();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
-
-                System.out.println("New Elements: " + newElements);
-                dataToSend = newElements;
 
                 JSONObject jsonOptionsObject = new JSONObject();
                 try {
@@ -169,11 +148,13 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                     throw new RuntimeException(e);
                 }
 
+                String dataToSend = elements.toString();
                 String optionsString = jsonOptionsObject.toString();
 
                 String payload = "[" + dataToSend + "," + optionsString + "]";
-
                 System.out.println("Payload: " + payload + "\n");
+
+                // To store the node positions and sizes received in response for the layout
                 Map<String,JSONObject> nodePositions = new HashMap<String, JSONObject>();
                 Map<String,JSONObject> nodeSizes = new HashMap<String, JSONObject>();
 
@@ -211,6 +192,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                     JSONObject position = nodePositions.get(nodeId);
                     JSONObject sizes = nodeSizes.get(nodeId);
 
+                    // Set new position of the nodes
                     if(position != null) {
                         try {
                             nodeView.setVisualProperty(xLoc, position.getDouble("x"));
@@ -220,6 +202,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                         }
                     }
 
+                    // Set new sizes of the nodes
                     if(sizes != null) {
                         try {
                             nodeView.setVisualProperty(height, sizes.getDouble("height"));
