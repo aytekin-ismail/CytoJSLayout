@@ -37,10 +37,9 @@ public class ApiHelper {
                     response.append(line);
                 }
             }
-            System.out.println("Response: " + response + "\n");
         }
         else {
-            System.out.println("POST request failed: " + responseCode);
+            System.err.println("POST request failed: " + responseCode);
         }
         connection.disconnect();
 

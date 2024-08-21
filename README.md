@@ -29,6 +29,8 @@ Change to the cloned directory
 mvn clean install
 ```
 
+### Install
+
 Locate the compiled `target/CytoJSLayout-1.0.jar` file.
 
 Copy the file to `CytoscapeConfiguration/3/apps/installed` location.

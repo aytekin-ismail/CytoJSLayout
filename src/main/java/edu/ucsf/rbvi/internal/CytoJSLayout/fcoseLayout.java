@@ -68,6 +68,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                 try {
                     jsonWriter.run(taskMonitor);
                 } catch (Exception e) {
+                    System.err.println("Exception: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
@@ -76,8 +77,8 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                 try {
                     JSONObject json = new JSONObject(outputString.toString());
                     elements = json.getJSONObject("elements");
-                    System.out.println("Elements: " + elements.toString(4));
                 } catch (JSONException e) {
+                    System.err.println("Exception: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
@@ -92,8 +93,6 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
 
                     nodeToWidth.put(nodeId, nodeWidth);
                     nodeToHeight.put(nodeId, nodeHeight);
-
-                    System.out.println("Node ID:" + nodeId + " Width:" + nodeWidth + " Height:" + nodeHeight);
                 }
 
                 // Add the node height and width to the elements data
@@ -108,6 +107,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                         data.put("height", nodeToHeight.get(nodeSUID));
                     }
                 } catch (JSONException e) {
+                    System.err.println("Exception: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
@@ -143,8 +143,6 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
 
                     jsonOptionsObject.put("layoutOptions", layoutOptions);
                     jsonOptionsObject.put("imageOptions", imageOptions);
-
-                    System.out.println(jsonOptionsObject.toString(4));
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -153,7 +151,6 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                 String optionsString = jsonOptionsObject.toString();
 
                 String payload = "[" + dataToSend + "," + optionsString + "]";
-                System.out.println("Payload: " + payload + "\n");
 
                 // To store the node positions and sizes received in response for the layout
                 Map<String,JSONObject> nodePositions = new HashMap<String, JSONObject>();
@@ -174,8 +171,6 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                         } catch (Exception e) {
                             System.out.println("Exception: " + e.getMessage());
                         }
-                        System.out.println("Node: " + node + " Position: " + position);
-                        System.out.println("Node: " + node + " Position: " + sizes);
                     }
                 }
                 catch (Exception e) {
@@ -189,7 +184,6 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
 
                 for (final View<CyNode> nodeView : nodesToLayOut) {
                     String nodeId = nodeView.getModel().getSUID().toString();
-                    System.out.println("Node ID: " + nodeId);
                     JSONObject position = nodePositions.get(nodeId);
                     JSONObject sizes = nodeSizes.get(nodeId);
 
@@ -199,6 +193,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                             nodeView.setVisualProperty(xLoc, position.getDouble("x"));
                             nodeView.setVisualProperty(yLoc, position.getDouble("y"));
                         } catch (JSONException e) {
+                            System.out.println("Exception: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
@@ -209,6 +204,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
                             nodeView.setVisualProperty(height, sizes.getDouble("height"));
                             nodeView.setVisualProperty(width, sizes.getDouble("width"));
                         } catch (JSONException e) {
+                            System.out.println("Exception: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }

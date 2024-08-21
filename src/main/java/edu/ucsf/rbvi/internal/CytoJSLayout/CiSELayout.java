@@ -18,9 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -74,6 +71,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                 try {
                     jsonWriter.run(taskMonitor);
                 } catch (Exception e) {
+                    System.err.println("Exception: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
@@ -82,8 +80,8 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                 try {
                     JSONObject json = new JSONObject(outputString.toString());
                     elements = json.getJSONObject("elements");
-                    System.out.println("Elements: " + elements.toString(4));
                 } catch (JSONException e) {
+                    System.err.println("Exception: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
@@ -98,8 +96,6 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
 
                     nodeToWidth.put(nodeId, nodeWidth);
                     nodeToHeight.put(nodeId, nodeHeight);
-
-                    System.out.println("Node ID:" + nodeId + " Width:" + nodeWidth + " Height:" + nodeHeight);
                 }
 
                 // Add the node height and width to the elements data
@@ -114,6 +110,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                         data.put("height", nodeToHeight.get(nodeSUID));
                     }
                 } catch (JSONException e) {
+                    System.err.println("Exception: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
@@ -144,10 +141,8 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
 
                     jsonOptionsObject.put("layoutOptions", layoutOptions);
                     jsonOptionsObject.put("imageOptions", imageOptions);
-
-                    System.out.println(jsonOptionsObject.toString(4));
-
                 } catch (JSONException e) {
+                    System.err.println("Exception: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
 
@@ -155,7 +150,6 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                 String optionsString = jsonOptionsObject.toString();
 
                 String payload = "[" + dataToSend + "," + optionsString + "]";
-                System.out.println("Payload: " + payload + "\n");
 
                 Map<String,JSONObject> nodePositions = new HashMap<String, JSONObject>();
                 Map<String,JSONObject> nodeSizes = new HashMap<String, JSONObject>();
@@ -174,8 +168,6 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                         } catch (Exception e) {
                             System.out.println("Exception: " + e.getMessage());
                         }
-                        System.out.println("Node: " + node + " Position: " + position);
-                        System.out.println("Node: " + node + " Position: " + sizes);
                     }
                 }
                 catch (Exception e) {
@@ -189,7 +181,6 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
 
                 for (final View<CyNode> nodeView : nodesToLayOut) {
                     String nodeId = nodeView.getModel().getSUID().toString();
-                    System.out.println("Node ID: " + nodeId);
                     JSONObject position = nodePositions.get(nodeId);
                     JSONObject sizes = nodeSizes.get(nodeId);
 
@@ -199,6 +190,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                             nodeView.setVisualProperty(xLoc, position.getDouble("x"));
                             nodeView.setVisualProperty(yLoc, position.getDouble("y"));
                         } catch (JSONException e) {
+                            System.err.println("Exception: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
@@ -209,6 +201,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
                             nodeView.setVisualProperty(height, sizes.getDouble("height"));
                             nodeView.setVisualProperty(width, sizes.getDouble("width"));
                         } catch (JSONException e) {
+                            System.err.println("Exception: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
