@@ -28,7 +28,7 @@ public class DagreLayout extends AbstractLayoutAlgorithm {
     private final String syblarsUrl;
 
     public DagreLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
-        super("DagreLayout", "CytoJS Layout: Dagre Layout", undo);
+        super("DagreLayout", "Cytoscape.js Dagre Layout", undo);
         this.writeCyJs = writeNetwork;
         this.syblarsUrl = syblarsUrl;
     }

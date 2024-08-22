@@ -28,7 +28,7 @@ public class fcoseLayout extends AbstractLayoutAlgorithm {
     private final String syblarsUrl;
 
     public fcoseLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
-        super("fcoseLayout", "CytoJS Layout: fCoSE Layout", undo);
+        super("fcoseLayout", "Cytoscape.js fCoSE Layout", undo);
         this.writeCyJs = writeNetwork;
         this.syblarsUrl = syblarsUrl;
     }
