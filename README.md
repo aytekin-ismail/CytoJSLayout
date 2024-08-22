@@ -31,7 +31,7 @@ mvn clean install
 
 ### Install
 **Manually**
-- Locate the compiled `target/CytoJSLayout-1.0.jar` file.
+- Locate the compiled `target/CytoJSLayout-<version>.jar` file.
 - Copy the file to `CytoscapeConfiguration/3/apps/installed` location.
 - Run `Cytoscape`
 
