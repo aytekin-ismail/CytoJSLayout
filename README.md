@@ -30,11 +30,14 @@ mvn clean install
 ```
 
 ### Install
+**Manually**
+- Locate the compiled `target/CytoJSLayout-1.0.jar` file.
+- Copy the file to `CytoscapeConfiguration/3/apps/installed` location.
+- Run `Cytoscape`
 
-Locate the compiled `target/CytoJSLayout-1.0.jar` file.
-
-Copy the file to `CytoscapeConfiguration/3/apps/installed` location.
-
-Run `Cytoscape`
+**via GUI**
+- Run `Cytoscape`
+- Go to menu `Apps > App Store > Install apps from file`
+- Select the `CytoJSLayout-<version>.jar` file
 
 The plugin layouts will be available to be used in the `layout` menu.
