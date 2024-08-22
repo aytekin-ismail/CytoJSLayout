@@ -28,7 +28,7 @@ public class CiSELayout extends AbstractLayoutAlgorithm {
     private final String syblarsUrl;
 
     public CiSELayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
-        super("CiSELayout", "CiSE Layout", undo);
+        super("CiSELayout", "CytoJS Layout: CiSE Layout", undo);
         this.writeCyJs = writeNetwork;
         this.syblarsUrl = syblarsUrl;
     }

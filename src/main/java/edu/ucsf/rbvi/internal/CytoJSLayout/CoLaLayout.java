@@ -28,7 +28,7 @@ public class CoLaLayout extends AbstractLayoutAlgorithm {
     private final String syblarsUrl;
 
     public CoLaLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
-        super("CoLaLayout", "CoLa Layout", undo);
+        super("CoLaLayout", "CytoJS Layout: CoLa Layout", undo);
         this.writeCyJs = writeNetwork;
         this.syblarsUrl = syblarsUrl;
     }

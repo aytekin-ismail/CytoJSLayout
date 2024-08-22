@@ -28,7 +28,7 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
     private final String syblarsUrl;
 
     public AvsdfLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
-        super("AvsdfLayout", "Avsdf Layout", undo);
+        super("AvsdfLayout", "CytoJS Layout: Avsdf Layout", undo);
         this.writeCyJs = writeNetwork;
         this.syblarsUrl = syblarsUrl;
     }

@@ -50,7 +50,8 @@ public class CyActivator extends AbstractCyActivator {
 	public void start(BundleContext context) throws Exception {
 		final CyServiceRegistrar serviceRegistrar = getService(context, CyServiceRegistrar.class);
 		final UndoSupport undoSupport = getService(context, UndoSupport.class);
-		final String syblarsURL = "http://localhost:3000/json?image=false";
+//		final String syblarsURL = "http://localhost:3000/json?image=false";
+		final String syblarsURL = "http://syblars.cs.bilkent.edu.tr/json?image=false";
 
 		String filter = "("+ID+"=cytoscapejsNetworkWriterFactory)";
 		CyNetworkViewWriterFactory writeCyJs = serviceRegistrar.getService(CyNetworkViewWriterFactory.class, filter);
