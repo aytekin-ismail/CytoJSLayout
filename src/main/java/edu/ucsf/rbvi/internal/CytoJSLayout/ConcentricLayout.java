@@ -1,6 +1,8 @@
 package edu.ucsf.rbvi.internal.CytoJSLayout;
 
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
+import org.cytoscape.work.undo.UndoSupport;
+
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.layout.AbstractLayoutAlgorithm;
@@ -12,7 +14,6 @@ import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
-import org.cytoscape.work.undo.UndoSupport;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,14 +23,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-public class AvsdfLayout extends AbstractLayoutAlgorithm{
+public class ConcentricLayout  extends AbstractLayoutAlgorithm{
     private final CyNetworkViewWriterFactory writeCyJs;
 
     private final String syblarsUrl;
-
-    public AvsdfLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
-        super("AvsdfLayout", "Cytoscape.js Avsdf Layout", undo);
+    public ConcentricLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
+        super("Concentric Layout", "Cytoscape.js Concentric Layout", undo);
         this.writeCyJs = writeNetwork;
         this.syblarsUrl = syblarsUrl;
     }
@@ -37,12 +36,12 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
     @Override
     public TaskIterator createTaskIterator(CyNetworkView networkView, Object context,
                                            Set<View<CyNode>> nodesToLayOut, String attrName) {
-        final AvsdfLayoutContext myContext = (AvsdfLayoutContext) context;
+
+        final ConcentricLayoutContext myContext = (ConcentricLayoutContext) context;
         final CyNetworkView myView = networkView;
         final CyNetworkViewWriterFactory writeCyJs = this.writeCyJs;
         final ApiHelper apiHelper = new ApiHelper(syblarsUrl);
-
-        Task task = new AbstractLayoutTask(toString(), networkView, nodesToLayOut, attrName, undoSupport) {
+        Task task = new AbstractLayoutTask(toString(), networkView, nodesToLayOut, attrName, undoSupport){
             @Override
             protected void doLayout(TaskMonitor taskMonitor) {
 
@@ -67,8 +66,6 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                     throw new RuntimeException(e);
                 }
 
-                // Access the value of a specific key
-
                 JSONObject elements = null;
                 try {
                     JSONObject json = new JSONObject(outputString.toString());
@@ -83,7 +80,6 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                     System.err.println("JSON Parsing Exception: " + e.getMessage());
                     e.printStackTrace();
                 }
-
                 // Store node height and width to be used later
                 Map<String, Double> nodeToWidth = new HashMap<>();
                 Map<String, Double> nodeToHeight = new HashMap<>();
@@ -114,14 +110,20 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                 }
 
                 JSONObject jsonOptionsObject = new JSONObject();
-                try {
+                try{
                     JSONObject layoutOptions = new JSONObject();
-                    layoutOptions.put("name", "avsdf");
-                    layoutOptions.put("animate", false);
+                    layoutOptions.put("name", "concentric");
 
                     layoutOptions.put("padding", myContext.padding);
-                    layoutOptions.put("nodeSeparation", myContext.nodeSeparation);
+                    layoutOptions.put("start angle",myContext.startAngle);
 
+                    layoutOptions.put("clockwise",myContext.clockwise);
+                    layoutOptions.put("equalDistance", myContext.equidistant);
+                    layoutOptions.put("minimumNodeDistance", myContext.minNodeSpacing);
+                    layoutOptions.put("avoidOverlap", myContext.avoidOverlap);
+                    layoutOptions.put("nodeDimensionsIncludeLabels", myContext.nodeDimensionsIncludeLabels);
+
+                    //from other layout options
                     JSONObject imageOptions = new JSONObject();
                     imageOptions.put("format", "png");
                     imageOptions.put("background", "transparent");
@@ -140,18 +142,16 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
 
                 String payload = "[" + dataToSend + "," + optionsString + "]";
 
+                // To store the node positions and sizes received in response for the layout
                 Map<String,JSONObject> nodePositions = new HashMap<String, JSONObject>();
                 Map<String,JSONObject> nodeSizes = new HashMap<String, JSONObject>();
 
                 try {
                     JSONObject layoutFromResponse = apiHelper.postToSyblars(payload);
-                    System.out.println("Response JSON: " + layoutFromResponse.toString(4));
 
                     Iterator<String> nodes = layoutFromResponse.keys();
                     while(nodes.hasNext()) {
                         String node = nodes.next();
-                        System.out.println("Node: " + node + " -> " + layoutFromResponse.getJSONObject(node).toString(4));
-
                         JSONObject value = layoutFromResponse.getJSONObject(node);
                         JSONObject position = value.getJSONObject("position");
                         JSONObject sizes = value.getJSONObject("data");
@@ -159,12 +159,12 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                             nodePositions.put(node, position);
                             nodeSizes.put(node, sizes);
                         } catch (Exception e) {
-                            System.err.println("Exception: " + e.getMessage());
-                            e.printStackTrace();
+                            System.out.println("Exception: " + e.getMessage());
                         }
                     }
-                } catch (Exception e) {
-                    System.err.println("Exception: " + e.getMessage());
+                }
+                catch (Exception e) {
+                    System.out.println("Exception: " + e.getMessage());
                 }
 
                 final VisualProperty<Double> xLoc = BasicVisualLexicon.NODE_X_LOCATION;
@@ -183,7 +183,7 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                             nodeView.setVisualProperty(xLoc, position.getDouble("x"));
                             nodeView.setVisualProperty(yLoc, position.getDouble("y"));
                         } catch (JSONException e) {
-                            System.err.println("Exception: " + e.getMessage());
+                            System.out.println("Exception: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
@@ -194,7 +194,7 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                             nodeView.setVisualProperty(height, sizes.getDouble("height"));
                             nodeView.setVisualProperty(width, sizes.getDouble("width"));
                         } catch (JSONException e) {
-                            System.err.println("Exception: " + e.getMessage());
+                            System.out.println("Exception: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
@@ -204,7 +204,6 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
         return new TaskIterator(task);
     }
 
-    public Object createLayoutContext() {
-        return new AvsdfLayoutContext();
+    public Object createLayoutContext(){return new ConcentricLayoutContext();
     }
 }

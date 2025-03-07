@@ -1,21 +1,21 @@
 package edu.ucsf.rbvi.internal.CytoJSLayout;
 
-import org.cytoscape.io.write.CyNetworkViewWriterFactory;
-import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.view.layout.AbstractLayoutAlgorithm;
+import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.view.layout.AbstractLayoutTask;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.model.VisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.undo.UndoSupport;
+import org.cytoscape.work.Task;
+import org.cytoscape.io.write.CyWriter;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 import java.io.*;
 import java.util.HashMap;
@@ -23,26 +23,28 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-public class AvsdfLayout extends AbstractLayoutAlgorithm{
-    private final CyNetworkViewWriterFactory writeCyJs;
+public class BreadthFirstLayout extends AbstractLayoutAlgorithm {
 
+    private final CyNetworkViewWriterFactory writeCyJs;
     private final String syblarsUrl;
 
-    public AvsdfLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
-        super("AvsdfLayout", "Cytoscape.js Avsdf Layout", undo);
+    public BreadthFirstLayout(UndoSupport undo, CyNetworkViewWriterFactory writeNetwork, String syblarsUrl) {
+        super("Breadth First Layout", "Cytoscape.js Breadth First Layout", undo);
         this.writeCyJs = writeNetwork;
         this.syblarsUrl = syblarsUrl;
     }
 
-    @Override
     public TaskIterator createTaskIterator(CyNetworkView networkView, Object context,
-                                           Set<View<CyNode>> nodesToLayOut, String attrName) {
-        final AvsdfLayoutContext myContext = (AvsdfLayoutContext) context;
+                                           Set<View<CyNode>> nodesToLayOut,
+                                           String attrName) {
+        final BreadthFirstLayoutContext myContext = (BreadthFirstLayoutContext) context;
         final CyNetworkView myView = networkView;
         final CyNetworkViewWriterFactory writeCyJs = this.writeCyJs;
         final ApiHelper apiHelper = new ApiHelper(syblarsUrl);
 
-        Task task = new AbstractLayoutTask(toString(), networkView, nodesToLayOut, attrName, undoSupport) {
+        Task task = new AbstractLayoutTask(
+                toString(), networkView, nodesToLayOut, attrName, undoSupport
+        ) {
             @Override
             protected void doLayout(TaskMonitor taskMonitor) {
 
@@ -59,7 +61,11 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                     }
                 };
 
-                CyWriter jsonWriter = writeCyJs.createWriter(outputString, myView);
+                // Open Output stream
+                CyWriter jsonWriter = writeCyJs.createWriter(
+                        outputString,
+                        myView
+                );
                 try {
                     jsonWriter.run(taskMonitor);
                 } catch (Exception e) {
@@ -68,7 +74,6 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                 }
 
                 // Access the value of a specific key
-
                 JSONObject elements = null;
                 try {
                     JSONObject json = new JSONObject(outputString.toString());
@@ -116,11 +121,14 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                 JSONObject jsonOptionsObject = new JSONObject();
                 try {
                     JSONObject layoutOptions = new JSONObject();
-                    layoutOptions.put("name", "avsdf");
-                    layoutOptions.put("animate", false);
-
+                    layoutOptions.put("name", "breadthfirst");
+                    layoutOptions.put("directed", myContext.directed);
                     layoutOptions.put("padding", myContext.padding);
-                    layoutOptions.put("nodeSeparation", myContext.nodeSeparation);
+                    layoutOptions.put("circle", myContext.circle);
+                    layoutOptions.put("grid", myContext.grid);
+                    layoutOptions.put("spacingFactor", myContext.spacingFactor);
+                    layoutOptions.put("avoid0verlap",myContext.avoidOverlap);
+                    layoutOptions.put("nodeDimensionsIncludeLabels", myContext.nodeDimensionsIncludeLabels);
 
                     JSONObject imageOptions = new JSONObject();
                     imageOptions.put("format", "png");
@@ -128,6 +136,7 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                     imageOptions.put("width", 1280);
                     imageOptions.put("height", 720);
                     imageOptions.put("color", "bluescale");
+
                     jsonOptionsObject.put("layoutOptions", layoutOptions);
                     jsonOptionsObject.put("imageOptions", imageOptions);
                 } catch (JSONException e) {
@@ -140,18 +149,16 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
 
                 String payload = "[" + dataToSend + "," + optionsString + "]";
 
+                // To store the node positions and sizes received in response for the layout
                 Map<String,JSONObject> nodePositions = new HashMap<String, JSONObject>();
                 Map<String,JSONObject> nodeSizes = new HashMap<String, JSONObject>();
 
                 try {
                     JSONObject layoutFromResponse = apiHelper.postToSyblars(payload);
-                    System.out.println("Response JSON: " + layoutFromResponse.toString(4));
 
                     Iterator<String> nodes = layoutFromResponse.keys();
                     while(nodes.hasNext()) {
                         String node = nodes.next();
-                        System.out.println("Node: " + node + " -> " + layoutFromResponse.getJSONObject(node).toString(4));
-
                         JSONObject value = layoutFromResponse.getJSONObject(node);
                         JSONObject position = value.getJSONObject("position");
                         JSONObject sizes = value.getJSONObject("data");
@@ -159,12 +166,12 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                             nodePositions.put(node, position);
                             nodeSizes.put(node, sizes);
                         } catch (Exception e) {
-                            System.err.println("Exception: " + e.getMessage());
-                            e.printStackTrace();
+                            System.out.println("Exception: " + e.getMessage());
                         }
                     }
-                } catch (Exception e) {
-                    System.err.println("Exception: " + e.getMessage());
+                }
+                catch (Exception e) {
+                    System.out.println("Exception: " + e.getMessage());
                 }
 
                 final VisualProperty<Double> xLoc = BasicVisualLexicon.NODE_X_LOCATION;
@@ -183,7 +190,7 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                             nodeView.setVisualProperty(xLoc, position.getDouble("x"));
                             nodeView.setVisualProperty(yLoc, position.getDouble("y"));
                         } catch (JSONException e) {
-                            System.err.println("Exception: " + e.getMessage());
+                            System.out.println("Exception: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
@@ -194,17 +201,19 @@ public class AvsdfLayout extends AbstractLayoutAlgorithm{
                             nodeView.setVisualProperty(height, sizes.getDouble("height"));
                             nodeView.setVisualProperty(width, sizes.getDouble("width"));
                         } catch (JSONException e) {
-                            System.err.println("Exception: " + e.getMessage());
+                            System.out.println("Exception: " + e.getMessage());
                             throw new RuntimeException(e);
                         }
                     }
                 }
+
             }
         };
         return new TaskIterator(task);
     }
 
     public Object createLayoutContext() {
-        return new AvsdfLayoutContext();
+        return new BreadthFirstLayoutContext();
     }
+
 }

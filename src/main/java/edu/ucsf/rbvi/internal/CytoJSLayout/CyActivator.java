@@ -50,8 +50,8 @@ public class CyActivator extends AbstractCyActivator {
 	public void start(BundleContext context) throws Exception {
 		final CyServiceRegistrar serviceRegistrar = getService(context, CyServiceRegistrar.class);
 		final UndoSupport undoSupport = getService(context, UndoSupport.class);
-//		final String syblarsURL = "http://localhost:3000/json?image=false";
-		final String syblarsURL = "http://syblars.cs.bilkent.edu.tr/json?image=false";
+		final String syblarsURL = "http://localhost:3000/json?image=false";
+		//final String syblarsURL = "https://syblars.cs.bilkent.edu.tr/json?image=false";
 
 		String filter = "("+ID+"=cytoscapejsNetworkWriterFactory)";
 		CyNetworkViewWriterFactory writeCyJs = serviceRegistrar.getService(CyNetworkViewWriterFactory.class, filter);
@@ -100,6 +100,24 @@ public class CyActivator extends AbstractCyActivator {
 			props.setProperty(TITLE, avsdfLayout.toString());
 			props.setProperty(MENU_GRAVITY, "10.1");
 			registerService(context, avsdfLayout, CyLayoutAlgorithm.class, props);
+		}
+		{
+			final ConcentricLayout concentricLayout = new ConcentricLayout(undoSupport, writeCyJs, syblarsURL);
+			final Properties props = new Properties();
+			props.setProperty("preferredTaskManager", "menu");
+			props.setProperty(PREFERRED_MENU, "Layout");
+			props.setProperty(TITLE, concentricLayout.toString());
+			props.setProperty(MENU_GRAVITY, "10.1");
+			registerService(context, concentricLayout, CyLayoutAlgorithm.class, props);
+		}
+		{
+			final BreadthFirstLayout breadthFirstLayout = new BreadthFirstLayout(undoSupport, writeCyJs, syblarsURL);
+			final Properties props = new Properties();
+			props.setProperty("preferredTaskManager", "menu");
+			props.setProperty(PREFERRED_MENU, "Layout");
+			props.setProperty(TITLE, breadthFirstLayout.toString());
+			props.setProperty(MENU_GRAVITY, "10.1");
+			registerService(context, breadthFirstLayout, CyLayoutAlgorithm.class, props);
 		}
 
 	}
